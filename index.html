@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Random Who</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <link href="https://cdn.jsdelivr.net/npm/daisyui@4.11.1/dist/full.min.css" rel="stylesheet" type="text/css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+  <div class="container mx-auto">
+    <div class="hero min-h-screen bg-base-200">
+      <div class="hero-content text-center">
+        <div class="max-w-md">
+          <h1 class="text-5xl font-bold" id="ep">Random Doctor</h1>
+          <p class="py-6">
+            Struggling to pick an episode of Doctor Who? Use this tool to find one. <a href="https://wikidata.org/">Data from Wikidata</a>.
+          </p>
+          <form>
+            <div class="grid grid-cols-2">
+              <div>
+                <select class="select w-full max-w-xs" id="doctor">
+                  <option disabled selected value="">Pick your doctor</option>
+                  <option value="">Any</option>
+                </select>
+              </div>
+              <div>
+                <select class="select w-full max-w-xs" id="writer">
+                  <option disabled selected value="">Pick your writer</option>
+                  <option value="">Any</option>
+                </select>
+              </div>
+            </div>
+            <button class="btn btn-primary">Get Started</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="text/javascript">
+    let x = []
+    fetch("doctor.json").then((r) => r.json()).then((r) => {
+      x = r
+      let doctors = x.map((y) => { return y.doctor }).filter((value, index, array) => array.indexOf(value) === index);
+      doctors.forEach((doc) => {
+        let opt = document.createElement('option')
+        opt.innerText = doc
+        document.getElementById('doctor').appendChild(opt)
+      })
+      let writers = x.map((y) => { return y.screenwriter }).filter((value, index, array) => array.indexOf(value) === index);
+      writers.forEach((doc) => {
+        let opt = document.createElement('option')
+        opt.innerText = doc
+        document.getElementById('writer').appendChild(opt)
+      })
+    })
+    document.querySelector('form').addEventListener('submit', (e) => {
+      e.preventDefault()
+
+      doctor = document.getElementById('doctor').value
+      a = x.filter((ep) => { return ep.doctor.includes(doctor) })
+      writer = document.getElementById('writer').value
+      b = a.filter((ep) => { return ep.screenwriter.includes(writer) })
+      ep = b[Math.floor(Math.random() * b.length)]
+      document.getElementById('ep').innerHTML = "S"+ep.series+" E"+ep.episode+"<br>"+ep.title
+    })
+  </script>
+</body>
+</html>
+
+<!--
+//SELECT DISTINCT ?seriesOrd ?epOrd ?episodeLabel ?directorLabel ?screenwriterLabel ?doctorLabel
+//WHERE {
+//  ?episode wdt:P179 wd:Q39243484.
+//  ?episode wdt:P4908/p:P361/pq:P1545 ?seriesOrd.
+//  ?episode p:P4908/pq:P1545 ?epOrd.
+//  ?episode wdt:P57 ?director.
+//  ?episode wdt:P58 ?screenwriter.
+//  OPTIONAL{
+//    ?episode wdt:P674 ?doctor.
+//    ?doctor wdt:P31 wd:Q47543030.
+//  }
+//
+//
+//  SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en". }
+//} ORDER BY ASC(xsd:integer(?seriesOrd)) ASC(xsd:integer(?epOrd))
+//LIMIT 1000
+-->
